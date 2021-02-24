@@ -2,16 +2,18 @@
 struct Node {                                      
    int data; // each listNode contains a character 
    struct Node *nextPtr; // pointer to next node
+   struct Node *prevPtr; // pointer to previous node
 }; // end structure listNode
 
 typedef struct Node LLnode; // synonym for struct listNode
 typedef LLnode *LLPtr; // synonym for ListNode*                        
 // prototypes
 
-int deletes( LLPtr *sPtr, int value );
+int deletes( LLPtr *sPtr, int value );//when change the fisrt one have to use pointer
 int isEmpty( LLPtr sPtr );
 void insert( LLPtr *sPtr, int value );
 void printList( LLPtr currentPtr );
+void printListR( LLPtr currentPtr );
 void instructions( void );
 
 
@@ -30,6 +32,7 @@ void instructions( void )
 void insert( LLPtr *sPtr, int value )
 { 
    LLPtr newPtr; // pointer to new node
+   //LLPtr prevPtr;// pointer to previous node
    LLPtr previousPtr; // pointer to previous node in list
    LLPtr currentPtr; // pointer to current node in list
 
@@ -38,6 +41,7 @@ void insert( LLPtr *sPtr, int value )
    if ( newPtr != NULL ) { // is space available
       newPtr->data = value; // place value in node
       newPtr->nextPtr = NULL; // node does not link to another node
+      newPtr->prevPtr = NULL;
 
       previousPtr = NULL;
       currentPtr = *sPtr;
@@ -46,8 +50,8 @@ void insert( LLPtr *sPtr, int value )
       while ( currentPtr != NULL && value > currentPtr->data ) {
          previousPtr = currentPtr; // walk to ...               
          currentPtr = currentPtr->nextPtr; // ... next node 
-      } // end while                                         
-
+      } // end while
+                                          
       // insert new node at beginning of list
       if ( previousPtr == NULL ) { 
          newPtr->nextPtr = *sPtr;
@@ -56,7 +60,14 @@ void insert( LLPtr *sPtr, int value )
       else { // insert new node between previousPtr and currentPtr
          previousPtr->nextPtr = newPtr;
          newPtr->nextPtr = currentPtr;
+         newPtr->prevPtr = previousPtr;
+         /*printf("\n>>%d\n",previousPtr->nextPtr->data);
+         printf("\n>>%d\n",newPtr->nextPtr->data);
+         printf("\n>>%d\n",newPtr->prevPtr->data);*/
       } // end else
+      if( currentPtr != NULL ){
+            currentPtr->prevPtr = newPtr;
+         }//
    } // end if
    else {
       printf( "%d not inserted. No memory available.\n", value );
@@ -74,6 +85,9 @@ int deletes( LLPtr *sPtr, int value )
    if ( value == ( *sPtr )->data ) { 
       tempPtr = *sPtr; // hold onto node being removed
       *sPtr = ( *sPtr )->nextPtr; // de-thread the node
+      if(*sPtr !=NULL){
+        (*sPtr)->prevPtr = NULL;
+      }
       free( tempPtr ); // free the de-threaded node
       return value;
    } // end if
@@ -91,6 +105,9 @@ int deletes( LLPtr *sPtr, int value )
       if ( currentPtr != NULL ) { 
          tempPtr = currentPtr;
          previousPtr->nextPtr = currentPtr->nextPtr;
+         if( currentPtr->nextPtr != NULL ){
+          currentPtr->nextPtr->prevPtr = previousPtr;
+         }
          free( tempPtr );
          return value;
       } // end if
@@ -124,3 +141,29 @@ void printList( LLPtr currentPtr )
       puts( "NULL\n" );
    } // end else
 } // end function printList
+
+void printListR( LLPtr currentPtr )
+{ 
+   // if list is empty
+   if ( isEmpty( currentPtr ) ) {
+      puts( "List is empty.\n" );
+   } // end if
+   else { 
+      puts( "The list is:" );
+      
+      while ( currentPtr->nextPtr != NULL ) {
+        currentPtr = currentPtr->nextPtr;
+      }
+      // while not the end of the list
+      printf("NULL");
+      while ( currentPtr != NULL ) { 
+         
+         printf( " --> %d ", currentPtr->data );
+         currentPtr = currentPtr->prevPtr;
+         //printf( " --> %d ", currentPtr->data );  
+         //printf("\n>>%d\n",currentPtr->prevPtr->data);
+      } // end while
+
+    printf("\n");  
+   } // end else
+}
